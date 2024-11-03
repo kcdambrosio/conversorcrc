@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversor de centímetros para curicos</title>
+    <style>
+        /* Configurações de estilo gerais */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #e9f1f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        h1 {
+            color: #007bff;
+            font-size: 28px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        label {
+            font-size: 16px;
+            color: #555;
+            margin-top: 10px;
+        }
+
+        input {
+            width: 90%;
+            padding: 12px;
+            margin: 15px 0;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            font-size: 16px;
+            text-align: center;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: #0056b3;
+            outline: none;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 10px 5px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #result {
+            font-size: 20px;
+            margin-top: 20px;
+            color: #333;
+            font-weight: bold;
+            display: none; /* Inicialmente escondido */
+        }
+
+        #rankingList {
+            list-style: none;
+            padding: 0;
+        }
+
+        #rankingList li {
+            font-size: 16px;
+            color: #333;
+            margin: 5px 0;
+        }
+
+        /* Esconde a tela de ranking inicialmente */
+        .ranking-screen {
+            display: none;
+        }
+
+        /* Adicionando um estilo de botão de limpar */
+        .clear-button {
+            background-color: #dc3545;
+        }
+
+        .clear-button:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container conversion-screen">
+        <h1>Conversor de centímetros para curicos</h1>
+        <label for="name">Digite seu nome:</label>
+        <input type="text" id="name" placeholder="Seu nome" required>
+        <label for="centimeters">Digite o valor em centímetros:</label>
+        <input type="number" id="centimeters" placeholder="Ex: 10" required>
+        <button onclick="convertToCrc()">Converter</button>
+        <button onclick="showRanking()">Ver Ranking</button>
+        <button class="clear-button" onclick="clearConversions()">Limpar Tudo</button>
+        <div id="result"></div>
+    </div>
+
+    <div class="container ranking-screen">
+        <h1>Ranking de Conversões</h1>
+        <ul id="rankingList"></ul>
+        <button onclick="showConverter()">Voltar</button>
+    </div>
+
+    <script>
+        function convertToCrc() {
+            const name = document.getElementById("name").value.trim();
+            const cm = parseFloat(document.getElementById("centimeters").value);
+            const conversionRate = 3.73;
+
+            if (name === "" || isNaN(cm) || cm < 0) {
+                alert("Por favor, insira um nome válido e um valor em centímetros!");
+                return;
+            }
+
+            const crc = cm * conversionRate;
+
+            // Exibe o resultado formatado
+            const resultText = `
+                <p><strong>Nome:</strong> ${name}</p>
+                <p><strong>Valor Original:</strong> ${cm} cm</p>
+                <p><strong>Resultado:</strong> ${crc.toFixed(2)} curicos</p>
+            `;
+            document.getElementById("result").innerHTML = resultText;
+            document.getElementById("result").style.display = 'block'; // Exibe o resultado
+            
+            // Salva o valor no localStorage
+            saveConversion(name, crc.toFixed(2)); // Salva o valor convertido
+        }
+
+        // Função para salvar as conversões no localStorage
+        function saveConversion(name, crc) {
+            let conversions = JSON.parse(localStorage.getItem("conversions")) || [];
+            conversions.push({name: name, crc: crc});
+            localStorage.setItem("conversions", JSON.stringify(conversions));
+        }
+
+        // Função para exibir o ranking de conversões
+        function showRanking() {
+            document.querySelector('.conversion-screen').style.display = 'none';
+            document.querySelector('.ranking-screen').style.display = 'block';
+
+            const rankingList = document.getElementById("rankingList");
+            rankingList.innerHTML = "";  // Limpa a lista antes de renderizar
+
+            const conversions = JSON.parse(localStorage.getItem("conversions")) || [];
+            conversions.slice(-10).reverse().forEach(entry => {
+                const listItem = document.createElement("li");
+                // Exibe o ranking no formato "Nome Resultado"
+                listItem.innerText = `${entry.name} ${entry.crc} curicos`;
+                rankingList.appendChild(listItem);
+            });
+        }
+
+        // Função para limpar todas as conversões
+        function clearConversions() {
+            localStorage.removeItem("conversions");
+            document.getElementById("result").innerHTML = ""; // Limpa o resultado
+            document.getElementById("result").style.display = 'none'; // Esconde o resultado
+            document.getElementById("name").value = ""; // Limpa o campo do nome
+            document.getElementById("centimeters").value = ""; // Limpa o campo de centímetros
+            alert("Todas as conversões foram limpas!");
+        }
+
+        // Função para voltar à tela de conversão
+        function showConverter() {
+            document.querySelector('.ranking-screen').style.display = 'none';
+            document.querySelector('.conversion-screen').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
